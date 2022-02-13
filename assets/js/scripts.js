@@ -66,6 +66,9 @@ function i_amir_homey_auth_render($warpar) {
     $(document).ready(function () {
         var $warpar = $("#modal-login").find(".modal-login-form");
         $("#modal-login").find(".modal-title").text("ورود / ثبت نام")
+        $("#modal-login").find(".modal-body-left").hide();
+        $("#modal-login").find(".modal-body-right").attr("class", "modal-body");
+
         $warpar.empty();
         //$warpar.append(`<p id="i-amir-login-title" class="text-center"><strong>ورود / ثبت نام</strong></p>`);
         i_amir_homey_auth_render($warpar);

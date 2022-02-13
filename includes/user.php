@@ -25,6 +25,16 @@ function i_amir_homey_validate_mobile($mobile) {
     }
 }
 
+function i_amir_homey_admin_mobiles() {
+    $mobiles = [];
+    foreach (array_column(get_users(['role' => "administrator"]), "ID") as $admin_id) {
+        if ($mobile = i_amir_homey_get_user_meta($admin_id, "mobile")) {
+            $mobiles[] = i_amir_homey_get_user_meta($admin_id, "mobile");
+        }
+    }
+    return $mobiles;
+}
+
 function i_amir_homey_validate_string($string) {
     if (preg_match("/^[ ؀-ۿa-zA-Z]*$/",$string)){
         return true;

@@ -14,13 +14,13 @@ function i_amir_homey_setting(){
         wp_die(__('You do not have sufficient permissions to access this page.'));
     }
     if ($_POST){
-        foreach (['sms_sender', 'sms_url', 'sms_api_key', 'sms_pattern_code', 'sms_pattern_user', 'sms_pattern_admin', 'sms_pattern_owner'] as $item) {
+        foreach (['sms_sender', 'sms_url', 'sms_api_key', 'sms_pattern_code', 'sms_pattern_user_submit', 'sms_pattern_user_ok', 'sms_pattern_user_nok', 'sms_pattern_admin', 'sms_pattern_owner'] as $item) {
             if (isset($_POST[$item]) && (is_array($_POST[$item]) ? count($_POST[$item]) : strlen($_POST[$item]))) {
                 update_option("i_amir_homey_$item", $_POST[$item]);
             }
         }
     }
-    foreach (['sms_url','sms_sender',  'sms_api_key', 'sms_pattern_code', 'sms_pattern_user', 'sms_pattern_admin', 'sms_pattern_owner'] as $item) {
+    foreach (['sms_url','sms_sender',  'sms_api_key', 'sms_pattern_code', 'sms_pattern_user_submit', 'sms_pattern_user_ok', 'sms_pattern_user_nok', 'sms_pattern_admin', 'sms_pattern_owner'] as $item) {
         $$item = get_option("i_amir_homey_$item");
     }
 
@@ -55,21 +55,33 @@ function i_amir_homey_setting(){
                 </div>
             </div>
             <div class="form-group row my-2">
-                <label class="col-lg-2 col-form-label text-right" for="sms_pattern_admin">پترن ارسال پیامک به کاربر</label>
+                <label class="col-lg-2 col-form-label text-right" for="sms_pattern_user_submit">پترن ارسال پیامک به کاربر(ثبت)</label>
+                <div class="col-lg-4">
+                    <input name="sms_pattern_user_submit" type="text" id="sms_pattern_user_submit" class="form-control text-left" dir="ltr" value="<?php echo $sms_pattern_user_submit; ?>" >
+                </div>
+            </div>
+            <div class="form-group row my-2">
+                <label class="col-lg-2 col-form-label text-right" for="sms_pattern_user_ok">پترن ارسال پیامک به کاربر(تایید)</label>
+                <div class="col-lg-4">
+                    <input name="sms_pattern_user_ok" type="text" id="sms_pattern_user_ok" class="form-control text-left" dir="ltr" value="<?php echo $sms_pattern_user_ok; ?>" >
+                </div>
+            </div>
+            <div class="form-group row my-2">
+                <label class="col-lg-2 col-form-label text-right" for="sms_pattern_user_nok">پترن ارسال پیامک به کاربر(لغو)</label>
+                <div class="col-lg-4">
+                    <input name="sms_pattern_user_nok" type="text" id="sms_pattern_user_nok" class="form-control text-left" dir="ltr" value="<?php echo $sms_pattern_user_nok; ?>" >
+                </div>
+            </div>
+            <div class="form-group row my-2">
+                <label class="col-lg-2 col-form-label text-right" for="sms_pattern_admin">پترن ارسال پیامک به مدیر</label>
                 <div class="col-lg-4">
                     <input name="sms_pattern_admin" type="text" id="sms_pattern_admin" class="form-control text-left" dir="ltr" value="<?php echo $sms_pattern_admin; ?>" >
                 </div>
             </div>
             <div class="form-group row my-2">
-                <label class="col-lg-2 col-form-label text-right" for="sms_pattern_owner">پترن ارسال پیامک به مدیر</label>
-                <div class="col-lg-4">
-                    <input name="sms_pattern_owner" type="text" id="sms_pattern_owner" class="form-control text-left" dir="ltr" value="<?php echo $sms_pattern_owner; ?>" >
-                </div>
-            </div>
-            <div class="form-group row my-2">
                 <label class="col-lg-2 col-form-label text-right" for="sms_pattern_user">پترن ارسال پیامک به صاحب اقامتگاه</label>
                 <div class="col-lg-4">
-                    <input name="sms_pattern_user" type="text" id="sms_pattern_user" class="form-control text-left" dir="ltr" value="<?php echo $sms_pattern_user; ?>" >
+                    <input name="sms_pattern_owner" type="text" id="sms_pattern_owner" class="form-control text-left" dir="ltr" value="<?php echo $sms_pattern_owner; ?>" >
                 </div>
             </div>
 

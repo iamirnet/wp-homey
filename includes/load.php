@@ -23,11 +23,11 @@ function i_amir_homey_scripts()
 
 add_action('wp_enqueue_scripts', 'i_amir_homey_scripts');
 
-
-function i_amir_homey_save_post( $post_ID, $post, $update ) {
-    if ($post->post_type == "homey_reservation" && !$update/* && get_post_meta($post_ID, "reservation_status",true) == "booked"*/) {
+function i_amir_homey_send_notifications( $post_ID, $post) {
+    if ($post->post_type == "homey_reservation" /* && get_post_meta($post_ID, "reservation_status",true) == "booked"*/) {
         $owner_id = get_post_meta($post_ID, "listing_owner",true);
         $renter_id = get_post_meta($post_ID, "listing_renter",true);
+
         foreach ([$owner_id => "sms_pattern_user", $renter_id => "sms_pattern_owner"] as $user_id => $sms_pattern) {
             if ($mobile = i_amir_homey_get_user_meta($user_id, "mobile")) {
                 i_amir_homey_sms_send($mobile, ["id" => (string) $post_ID], get_option("i_amir_homey_$sms_pattern"));
@@ -36,9 +36,55 @@ function i_amir_homey_save_post( $post_ID, $post, $update ) {
     }
 }
 
-add_action( 'save_post', 'i_amir_homey_save_post', 10, 3 );
+add_action( 'added_post_meta', 'i_amir_homey_save_post', 10, 4 );
+function i_amir_homey_save_post( $meta_id, $post_id, $meta_key, $meta_value )
+{
+    if (in_array($meta_key, ['listing_owner', 'listing_renter'])) {
+        $post = get_post($post_id);
+        if ($post->post_type == "homey_reservation") {
+            if ($mobile = i_amir_homey_get_user_meta($meta_value, "mobile")) {
+                i_amir_homey_sms_send($mobile, ["id" => (string) $post_id], get_option("i_amir_homey_" .($meta_key == "listing_owner" ? "sms_pattern_owner" : "sms_pattern_user_submit")));
+            }
+            if ($meta_key == "listing_renter") {
+                $admin_mobiles = i_amir_homey_admin_mobiles();
+                foreach ($admin_mobiles as $admin_mobile) {
+                    i_amir_homey_sms_send($admin_mobile, ["id" => (string) $post_id], get_option("i_amir_homey_sms_pattern_admin"));
+                }
+            }
+        }
+    }
+    if ($meta_key == "reservation_status") {
+        if (get_post_meta($post_id, "old_reservation_status",true) != $meta_value) {
+            switch ($meta_value) {
+                case "booked":
+                case "declined":
+                    $user_id = get_post_meta($post_id, "listing_renter",true);
+                    if ($mobile = i_amir_homey_get_user_meta($user_id, "mobile")) {
+                        i_amir_homey_sms_send($mobile, ["id" => (string) $post_id], get_option("i_amir_homey_" .($meta_value == "booked" ? "sms_pattern_user_ok" : "sms_pattern_user_nok")));
+                    }
+                    update_post_meta($post_id, "old_reservation_status", $meta_value);
+                    break;
+
+            }
+        }
+    }
+}
 
 add_action('rest_api_init', function () {
+    /*register_rest_route('iamir/homey/v1', '/test', array(
+        'methods' => 'POST',
+        'callback' => function () {
+            $mobiles = [];
+            foreach (array_column(get_users(['role' => "administrator"]), "ID") as $admin_id) {
+                if ($mobile = i_amir_homey_get_user_meta($admin_id, "mobile")) {
+                    $mobiles[] = i_amir_homey_get_user_meta($admin_id, "mobile");
+                }
+            }
+            return [
+                "data" => $mobiles
+            ];
+        },
+    ));*/
     register_rest_route('iamir/homey/v1', '/login', array(
         'methods' => 'POST',
         'callback' => function () {
@@ -90,7 +136,7 @@ add_action('rest_api_init', function () {
             return [
                 "data" => [
                     "status" => true,
-                    "message" => i_amir_homey_get_user_meta($user_id, "register_type") == "registered" ? "لطظفا کد دریافت شده را وارد کنید." : "لطفا فیلد های زیر را پر کنید.",
+                    "message" => i_amir_homey_get_user_meta($user_id, "register_type") == "registered" ? "لطفا کد دریافت شده را وارد کنید." : "لطفا فیلد های زیر را پر کنید.",
                     "type" => $type,
                     "mobile" => $mobile,
                 ]

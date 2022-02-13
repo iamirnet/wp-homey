@@ -10,5 +10,5 @@ Author URI: https://iamir.net
 */
 
 include "includes/load.php";
-/*include "includes/class.iAmirGFDollarField.php";
-include "includes/admins.php";*/
+include "includes/admins.php";
+include "includes/shortcodes.php";
